@@ -1,4 +1,4 @@
 cargo build --release
-rm -rf $HOME/.local/procmon
-mkdir -p $HOME/.local/procmon
-cp ./target/release/procmon ~/.local/procmon
+rm -rf $HOME/.local/procplot
+mkdir -p $HOME/.local/procplot
+cp ./target/release/procplot ~/.local/procplot

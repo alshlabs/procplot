@@ -3,13 +3,13 @@
 A command line utility that spawns a process and produces a `csv` report on its resource usage.
 
 ```bash
-Usage: procmon [OPTIONS] [COMMAND]...
+Usage: procplot [OPTIONS] [COMMAND]...
 
 Arguments:
   [COMMAND]...  Command to run
 
 Options:
-  -r, --report <REPORT_PATH>      Output path for the generated report [env: PM_REPORT=] [default: procmon.csv]
+  -r, --report <REPORT_PATH>      Output path for the generated report [env: PM_REPORT=] [default: procplot.csv]
   -i, --interval <POLL_INTERVAL>  How often to probe the process for details in milliseconds [env: PM_INTERVAL=] [default: 200]
   -m, --mem-units <MEM_UNITS>     What units to use for recording memory [env: PM_MEM_UNITS=] [default: mb] [possible values: mb, kb, b]
   -t, --time-units <TIME_UNITS>   What units to use for recording time [env: PM_TIME_UNITS=] [default: ms] [possible values: s, ms]
@@ -23,13 +23,13 @@ Options:
 # Usage
 
 ```bash
-procmon -- node -e "setTimeout(() => console.log('Sup'), 4000)"
+procplot -- node -e "setTimeout(() => console.log('Sup'), 4000)"
 ```
 
-This will produce a file named `procmon.csv`
+This will produce a file named `procplot.csv`
 
 ```bash
-procmon --report something.csv -- node -e "setTimeout(() => console.log('Sup'), 4000)"
+procplot --report something.csv -- node -e "setTimeout(() => console.log('Sup'), 4000)"
 ```
 
 This will produce a report called `something.csv`
@@ -55,35 +55,35 @@ time_s,cpu,memory_mb,disk_read,disk_write
 ## MacOS
 
 ```bash
-mkdir -p $HOME/.local/procmon
-curl -L --url https://github.com/alshdavid/procmon/releases/latest/download/macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procmon
-echo "\nexport \PATH=\$PATH:\$HOME/.local/procmon\n" >> $HOME/.zshrc
+mkdir -p $HOME/.local/procplot
+curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
+echo "\nexport \PATH=\$PATH:\$HOME/.local/procplot\n" >> $HOME/.zshrc
 source $HOME/.zshrc
 ```
 
 #### Updating
 
 ```bash
-rm -rf $HOME/.local/procmon
-mkdir -p $HOME/.local/procmon
-curl -L --url https://github.com/alshdavid/procmon/releases/latest/download/macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procmon
+rm -rf $HOME/.local/procplot
+mkdir -p $HOME/.local/procplot
+curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
 ```
 
 ## Linux
 
 ```bash
-mkdir -p $HOME/.local/procmon
-curl -L --url https://github.com/alshdavid/procmon/releases/latest/download/linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procmon
-echo "\nexport \PATH=\$PATH:\$HOME/.local/procmon\n" >> $HOME/.zshrc
+mkdir -p $HOME/.local/procplot
+curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
+echo "\nexport \PATH=\$PATH:\$HOME/.local/procplot\n" >> $HOME/.zshrc
 source $HOME/.zshrc
 ```
 
 #### Updating
 
 ```bash
-rm -rf $HOME/.local/procmon
-mkdir -p $HOME/.local/procmon
-curl -L --url https://github.com/alshdavid/procmon/releases/latest/download/linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procmon
+rm -rf $HOME/.local/procplot
+mkdir -p $HOME/.local/procplot
+curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
 ```
 
 ## Credit

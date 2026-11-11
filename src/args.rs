@@ -15,7 +15,7 @@ pub struct Args {
   pub command: Vec<String>,
 
   /// Output path for the generated report
-  #[arg(short = 'r', long = "report",  env = "PM_REPORT", value_parser = parse_file_path, default_value = "procmon.csv")]
+  #[arg(short = 'r', long = "report",  env = "PM_REPORT", value_parser = parse_file_path, default_value = "procplot.csv")]
   pub report_path: PathBuf,
 
   /// How often to probe the process for details in milliseconds
