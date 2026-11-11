@@ -2,6 +2,34 @@
 name = "procmon"
 version = "0.2.0"
 edition = "2024"
+description = "A command line utility that spawns a process and produces a csv report on its resource usage"
+license = "GPL-3.0"
+repository = "https://github.com/alshlabs/procplot"
+readme = "README.md"
+keywords = ["process", "monitor", "cli"]
+categories = ["command-line-utilities"]
+
+[lints.rust]
+elided_lifetimes_in_paths = "allow"
+rust_2018_idioms = { priority = -1, level = "deny" }
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+uninlined_format_args = "allow"
+module_inception = "allow"
+enum_glob_use = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+implicit_clone = "deny"
+clone_on_ref_ptr = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+multiple_crate_versions = "allow"
 
 [dependencies]
 anyhow = "1.0.104"
@@ -9,3 +37,9 @@ clap = { version = "4.6.7", features = ["derive", "env", "string"] }
 serde = { version = "1.0.229", features = ["serde_derive", "derive"] }
 sysinfo = "0.40.1"
 
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = 3
+strip = true
+panic = "abort"
