@@ -1,3 +1,3 @@
 env PM_REPORT=./test/report.csv \
-    cargo run \
+    cargo run -- exec \
     node ./test/script.mjs

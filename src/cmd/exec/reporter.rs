@@ -6,8 +6,8 @@ use std::sync::mpsc::channel;
 use std::thread::JoinHandle;
 use std::time::Duration;
 
-use crate::args::Args;
-use crate::args::MemoryUnits;
+use crate::cmd::exec::ExecCommand;
+use crate::cmd::exec::args::MemoryUnits;
 
 #[derive(Debug)]
 pub struct Columns {
@@ -37,7 +37,7 @@ impl Reporter {
     report_file: &Path,
     override_report: bool,
     columns: Columns,
-    args: Args,
+    args: ExecCommand,
   ) -> anyhow::Result<Self> {
     if !override_report && std::fs::exists(report_file)? {
       return Err(anyhow::anyhow!(
@@ -84,8 +84,10 @@ impl Reporter {
 
         line.push({
           match args.time_units {
-            crate::args::TimeUnits::S => format!("{:.3}", args.time_units.to_f64(row.time)),
-            crate::args::TimeUnits::Ms => format!("{}", row.time.as_millis()),
+            crate::cmd::exec::args::TimeUnits::S => {
+              format!("{:.3}", args.time_units.to_f64(row.time))
+            }
+            crate::cmd::exec::args::TimeUnits::Ms => format!("{}", row.time.as_millis()),
           }
         });
 

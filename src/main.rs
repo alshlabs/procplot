@@ -1,155 +1,40 @@
 #![deny(unused_crate_dependencies)]
 
-mod args;
-mod reporter;
+mod cmd;
 
-use anyhow::Context;
 use clap::Parser;
-use std::env;
-use std::process::Command;
-use std::process::Stdio;
-use std::sync::mpsc::channel;
-use std::thread;
-use std::time::Duration;
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
-use sysinfo::Pid;
-use sysinfo::ProcessesToUpdate;
-use sysinfo::System;
+use clap::Subcommand;
 
-use crate::args::Args;
-use crate::reporter::Columns;
-use crate::reporter::Reporter;
-use crate::reporter::Row;
+/// A command line utility that spawns a process and produces a csv report on
+/// its resource usage
+#[derive(Debug, Parser)]
+#[command(name = "procplot", version, about, long_about = None)]
+struct Command {
+  #[clap(subcommand)]
+  command: Commands,
+}
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+  /// Spawn a process and record its resource usage
+  #[clap(name = "exec", visible_aliases = ["e"])]
+  Exec(cmd::exec::ExecCommand),
+
+  /// Update the binary to the latest release
+  #[clap(name = "upgrade", visible_aliases = ["up", "u"])]
+  Upgrade(cmd::upgrade::UpgradeCommand),
+
+  /// Print the current version
+  Version,
+}
 
 fn main() -> anyhow::Result<()> {
-  let args = Args::parse();
-
-  let reporter = match Reporter::new(
-    &args.report_path,
-    args.override_report,
-    Columns {
-      cpu: !args.no_measure_cpu,
-      memory: !args.no_measure_mem,
-      disk: !args.no_measure_disk,
-    },
-    args.clone(),
-  ) {
-    Ok(v) => v,
-    Err(msg) => {
-      return Err(anyhow::anyhow!("Error: {}", msg));
+  match Command::parse().command {
+    Commands::Exec(args) => cmd::exec::main(&args),
+    Commands::Upgrade(args) => cmd::upgrade::main(&args),
+    Commands::Version => {
+      println!("{}", env!("CARGO_PKG_VERSION"));
+      Ok(())
     }
-  };
-
-  let (sender, receiver) = channel::<(u32, Duration)>();
-
-  // Monitor
-  let h0: thread::JoinHandle<anyhow::Result<()>> = {
-    let command = args.clone();
-    let reporter = reporter.clone();
-
-    thread::spawn(move || {
-      let (pid, start_time) = receiver.recv()?;
-      let pid = Pid::from(pid as usize);
-
-      // Please note that we use "new_all" to ensure that all list of
-      // components, network interfaces, disks and users are already filled!
-      let mut sys = System::new_all().context("Unable to initialise system")?;
-
-      loop {
-        if sys.refresh_processes(ProcessesToUpdate::Some(&[pid]), true) == 0 {
-          break;
-        }
-        let info = sys.process(pid).context("Unable to get process")?;
-
-        let now = SystemTime::now().duration_since(UNIX_EPOCH)?;
-        let mut row = Row::default();
-
-        if !command.no_measure_cpu {
-          let cpu = info.cpu_usage();
-          // Sysinfo reports a non-negative percentage, so clamping and truncating are safe
-          #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-          let cpu = cpu.round().max(0.0) as u64;
-          row.cpu = Some(cpu);
-        }
-
-        if !command.no_measure_mem {
-          let memory = info.memory();
-          row.memory = Some(memory);
-        }
-
-        if !command.no_measure_disk {
-          let disk = info.disk_usage();
-          row.disk_read = Some(disk.read_bytes);
-          row.disk_write = Some(disk.written_bytes);
-        }
-
-        row.time = now
-          .checked_sub(start_time)
-          .context("Clock moved backwards")?;
-
-        reporter.write(row)?;
-        thread::sleep(command.poll_interval);
-      }
-
-      Ok(())
-    })
-  };
-
-  // Process
-  let h1: thread::JoinHandle<anyhow::Result<()>> = {
-    let mut args = args.clone();
-    let reporter = reporter.clone();
-
-    thread::spawn(move || {
-      let mut command = {
-        let first = args.command.remove(0);
-
-        let mut command = Command::new(first);
-        command.args(args.command);
-
-        command.current_dir(env::current_dir()?);
-
-        command.stdout(Stdio::inherit());
-        command.stdin(Stdio::inherit());
-        command.stderr(Stdio::inherit());
-        command
-      };
-
-      let start_time = SystemTime::now().duration_since(UNIX_EPOCH)?;
-
-      reporter.write(Row {
-        time: Duration::from_millis(0),
-        memory: Some(0),
-        cpu: Some(0),
-        disk_read: Some(0),
-        disk_write: Some(0),
-      })?;
-
-      let mut child = command.spawn()?;
-      sender.send((child.id(), start_time))?;
-      child.wait()?;
-
-      let end_time = SystemTime::now().duration_since(UNIX_EPOCH)?;
-
-      reporter.write(Row {
-        time: end_time
-          .checked_sub(start_time)
-          .context("Clock moved backwards")?,
-        memory: Some(0),
-        cpu: Some(0),
-        disk_read: Some(0),
-        disk_write: Some(0),
-      })?;
-
-      Ok(())
-    })
-  };
-
-  h1.join()
-    .map_err(|_| anyhow::anyhow!("Process thread panicked"))??;
-  h0.join()
-    .map_err(|_| anyhow::anyhow!("Monitor thread panicked"))??;
-
-  Ok(())
+  }
 }
