@@ -31,14 +31,19 @@ pub struct Reporter {
 }
 
 impl Reporter {
+  // `columns` and `args` are owned so they can be moved into the writer thread
+  #[allow(clippy::needless_pass_by_value)]
   pub fn new(
     report_file: &Path,
-    override_report: &bool,
+    override_report: bool,
     columns: Columns,
     args: Args,
   ) -> anyhow::Result<Self> {
     if !override_report && std::fs::exists(report_file)? {
-      return Err(anyhow::anyhow!("Report {:?} already exists", report_file));
+      return Err(anyhow::anyhow!(
+        "Report {} already exists",
+        report_file.display()
+      ));
     }
 
     if std::fs::exists(report_file)? {
@@ -95,7 +100,7 @@ impl Reporter {
         {
           match args.mem_units {
             MemoryUnits::Mb => {
-              line.push(format!("{}", memory / 1048576_u64));
+              line.push(format!("{}", memory / 1_048_576_u64));
             }
             MemoryUnits::Kb => {
               line.push(format!("{}", memory / 1024_u64));
@@ -117,7 +122,7 @@ impl Reporter {
 
         let mut output = String::new();
         for (i, col) in line.iter().enumerate() {
-          output.push_str(&col.to_string());
+          output.push_str(col);
           if i != line.len() - 1 {
             output.push(',');
           }

@@ -27,7 +27,7 @@ fn main() -> anyhow::Result<()> {
 
   let reporter = match Reporter::new(
     &args.report_path,
-    &args.override_report,
+    args.override_report,
     Columns {
       cpu: !args.no_measure_cpu,
       memory: !args.no_measure_mem,
@@ -67,7 +67,10 @@ fn main() -> anyhow::Result<()> {
 
         if !command.no_measure_cpu {
           let cpu = info.cpu_usage();
-          row.cpu = Some(cpu.round() as u64);
+          // Sysinfo reports a non-negative percentage, so clamping and truncating are safe
+          #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+          let cpu = cpu.round().max(0.0) as u64;
+          row.cpu = Some(cpu);
         }
 
         if !command.no_measure_mem {
@@ -81,7 +84,9 @@ fn main() -> anyhow::Result<()> {
           row.disk_write = Some(disk.written_bytes);
         }
 
-        row.time = now - start_time;
+        row.time = now
+          .checked_sub(start_time)
+          .context("Clock moved backwards")?;
 
         reporter.write(row)?;
         thread::sleep(command.poll_interval);
@@ -128,7 +133,9 @@ fn main() -> anyhow::Result<()> {
       let end_time = SystemTime::now().duration_since(UNIX_EPOCH)?;
 
       reporter.write(Row {
-        time: end_time - start_time,
+        time: end_time
+          .checked_sub(start_time)
+          .context("Clock moved backwards")?,
         memory: Some(0),
         cpu: Some(0),
         disk_read: Some(0),
@@ -139,8 +146,10 @@ fn main() -> anyhow::Result<()> {
     })
   };
 
-  h1.join().unwrap()?;
-  h0.join().unwrap()?;
+  h1.join()
+    .map_err(|_| anyhow::anyhow!("Process thread panicked"))??;
+  h0.join()
+    .map_err(|_| anyhow::anyhow!("Monitor thread panicked"))??;
 
   Ok(())
 }

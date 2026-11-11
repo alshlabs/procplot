@@ -8,6 +8,8 @@ use clap::ValueEnum;
 use serde::Serialize;
 
 #[derive(Parser, Debug, Clone)]
+// The flags are user-facing CLI options, grouping them into a sub-struct would only complicate the interface.
+#[allow(clippy::struct_excessive_bools)]
 pub struct Args {
   /// Command to run
   pub command: Vec<String>,
@@ -57,10 +59,10 @@ pub struct Args {
   pub no_measure_disk: bool,
 }
 
-fn parse_file_path(arg: &str) -> Result<PathBuf, std::num::ParseIntError> {
+fn parse_file_path(arg: &str) -> anyhow::Result<PathBuf> {
   let mut target_path = PathBuf::from(arg);
   if target_path.is_relative() {
-    target_path = env::current_dir().unwrap().join(target_path);
+    target_path = env::current_dir()?.join(target_path);
   }
   Ok(target_path)
 }
@@ -102,8 +104,9 @@ impl TimeUnits {
     &self,
     t: Duration,
   ) -> f64 {
+    #[allow(clippy::cast_precision_loss)]
     match self {
-      TimeUnits::S => t.as_millis() as f64 / 1000_f64,
+      TimeUnits::S => t.as_secs_f64(),
       TimeUnits::Ms => t.as_millis() as f64,
     }
   }
