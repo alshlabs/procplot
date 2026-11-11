@@ -54,7 +54,7 @@ fn main() -> anyhow::Result<()> {
 
       // Please note that we use "new_all" to ensure that all list of
       // components, network interfaces, disks and users are already filled!
-      let mut sys = System::new_all();
+      let mut sys = System::new_all().context("Unable to initialise system")?;
 
       loop {
         if sys.refresh_processes(ProcessesToUpdate::Some(&[pid]), true) == 0 {
