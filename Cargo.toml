@@ -1,5 +1,5 @@
 [package]
-name = "procmon"
+name = "procplot"
 version = "0.2.0"
 edition = "2024"
 description = "A command line utility that spawns a process and produces a csv report on its resource usage"
