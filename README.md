@@ -2,34 +2,32 @@
 
 A command line utility that spawns a process and produces a `csv` report on its resource usage.
 
-```bash
-Usage: procplot [OPTIONS] [COMMAND]...
+```
+Usage: procplot <COMMAND>
 
-Arguments:
-  [COMMAND]...  Command to run
+Commands:
+  exec     Spawn a process and record its resource usage [alias: e]
+  upgrade  Update the binary to the latest release [aliases: up, u]
+  version  Print the current version
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -r, --report <REPORT_PATH>      Output path for the generated report [env: PM_REPORT=] [default: procplot.csv]
-  -i, --interval <POLL_INTERVAL>  How often to probe the process for details in milliseconds [env: PM_INTERVAL=] [default: 200]
-  -m, --mem-units <MEM_UNITS>     What units to use for recording memory [env: PM_MEM_UNITS=] [default: mb] [possible values: mb, kb, b]
-  -t, --time-units <TIME_UNITS>   What units to use for recording time [env: PM_TIME_UNITS=] [default: ms] [possible values: s, ms]
-  -o, --override-report           Override report file if exists
-      --no-cpu                    Don't measure CPU usage [env: PM_NO_CPU=]
-      --no-memory                 Don't measure memory usage [env: PM_NO_MEMORY=]
-      --no-disk                   Don't measure disk usage [env: PM_NO_DISK=]
-  -h, --help                      Print help
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 # Usage
 
+Run a command and record its resource usage with `exec`:
+
 ```bash
-procplot -- node -e "setTimeout(() => console.log('Sup'), 4000)"
+procplot exec -- node -e "setTimeout(() => console.log('Sup'), 4000)"
 ```
 
 This will produce a file named `procplot.csv`
 
 ```bash
-procplot --report something.csv -- node -e "setTimeout(() => console.log('Sup'), 4000)"
+procplot exec --report something.csv -- node -e "setTimeout(() => console.log('Sup'), 4000)"
 ```
 
 This will produce a report called `something.csv`
@@ -54,36 +52,36 @@ time_s,cpu,memory_mb,disk_read,disk_write
 
 ## MacOS
 
+### Upgrading
+
 ```bash
-mkdir -p $HOME/.local/procplot
-curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
-echo "\nexport \PATH=\$PATH:\$HOME/.local/procplot\n" >> $HOME/.zshrc
-source $HOME/.zshrc
+procplot upgrade
 ```
 
-#### Updating
+### Install script
 
 ```bash
-rm -rf $HOME/.local/procplot
 mkdir -p $HOME/.local/procplot
-curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
+curl -L --url https://github.com/alshlabs/procplot/releases/latest/download/procplot-macos-arm64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
+echo "\nexport \PATH=\$PATH:\$HOME/.local/procplot\n" >> $HOME/.zshrc
+source $HOME/.zshrc
 ```
 
 ## Linux
 
+### Upgrading
+
 ```bash
-mkdir -p $HOME/.local/procplot
-curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
-echo "\nexport \PATH=\$PATH:\$HOME/.local/procplot\n" >> $HOME/.zshrc
-source $HOME/.zshrc
+procplot upgrade
 ```
 
-#### Updating
+### Install script
 
 ```bash
-rm -rf $HOME/.local/procplot
 mkdir -p $HOME/.local/procplot
-curl -L --url https://github.com/alshdavid/procplot/releases/latest/download/linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
+curl -L --url https://github.com/alshlabs/procplot/releases/latest/download/procplot-linux-amd64.tar.gz | tar -xvzf - -C $HOME/.local/procplot
+echo "\nexport \PATH=\$PATH:\$HOME/.local/procplot\n" >> $HOME/.zshrc
+source $HOME/.zshrc
 ```
 
 ## Credit
