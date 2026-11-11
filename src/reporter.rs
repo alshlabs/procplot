@@ -85,24 +85,26 @@ impl Reporter {
         });
 
         if columns.cpu
-          && let Some(cpu) = row.cpu {
-            line.push(format!("{}", cpu));
-          }
+          && let Some(cpu) = row.cpu
+        {
+          line.push(format!("{}", cpu));
+        }
 
         if columns.memory
-          && let Some(memory) = row.memory {
-            match args.mem_units {
-              MemoryUnits::Mb => {
-                line.push(format!("{}", memory / 1048576_u64));
-              }
-              MemoryUnits::Kb => {
-                line.push(format!("{}", memory / 1024_u64));
-              }
-              MemoryUnits::B => {
-                line.push(format!("{}", memory));
-              }
+          && let Some(memory) = row.memory
+        {
+          match args.mem_units {
+            MemoryUnits::Mb => {
+              line.push(format!("{}", memory / 1048576_u64));
+            }
+            MemoryUnits::Kb => {
+              line.push(format!("{}", memory / 1024_u64));
+            }
+            MemoryUnits::B => {
+              line.push(format!("{}", memory));
             }
           }
+        }
 
         if columns.disk {
           if let Some(disk_read) = row.disk_read {
